@@ -30,3 +30,4 @@ whoosh_index/*
 CACHE
 CACHE/*
 togit.sh
+*.env

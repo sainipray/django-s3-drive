@@ -11,7 +11,9 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
+from dotenv import load_dotenv
 
+load_dotenv()
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -20,7 +22,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'k-3_gi82fe0^zrpn9e!i$x$+p%$_*x*bi*vrbbu5@o&syy3e*s'
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -118,15 +120,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
-
-AWS_ACCESS_KEY_ID = 'XXXXXXXXXXXXX'
-AWS_SECRET_ACCESS_KEY = 'XXXXXXXXXXXXXXXXXXX'
-AWS_STORAGE_BUCKET_NAME = 'XXXXXXXXXXX'
 AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400',
 }
-AWS_S3_SIGNATURE_VERSION = 's3v4'
-S3_USE_SIGV4 = True
-AWS_S3_REGION_NAME = 'us-east-1'
-AWS_DEFAULT_ACL = 'private'
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
+AWS_S3_SIGNATURE_VERSION = os.getenv("AWS_S3_SIGNATURE_VERSION")
+S3_USE_SIGV4 = os.getenv("S3_USE_SIGV4")
+AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME")
+AWS_DEFAULT_ACL = os.getenv("AWS_DEFAULT_ACL")
