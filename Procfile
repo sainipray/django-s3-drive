@@ -1,0 +1,1 @@
+web: gunicorn django_s3_drive.wsgi --log-file -
