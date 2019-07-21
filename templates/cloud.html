@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>S3 Bucket Drive</title>
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300i,400,400i,600,600i" rel="stylesheet">
+    <style>
+        a:hover {
+            text-decoration: none !important;
+        }
+
+        .drive-folder-main {
+            padding: 15px;
+        }
+
+        .navigation-row {
+            border-bottom: 1px solid #dadce0;
+        }
+
+        .navigation-row .breadcrumb {
+            background: transparent;
+            margin-bottom: 10px;
+            padding: 0;
+            width: 100%;
+        }
+
+        .navigation-row .breadcrumb .breadcrumb-item {
+            font-size: 18px;
+            border-radius: 8px;
+            line-height: 24px;
+            margin: 2px 0;
+            font-weight: 400;
+        }
+
+        .navigation-row .breadcrumb .breadcrumb-item a {
+            color: #3c4043;
+            padding: 3px 7px 3px;
+            display: inline-block;
+        }
+
+        .navigation-row .breadcrumb .breadcrumb-item a:hover {
+            background: #f1f3f4;
+        }
+
+        .heading-text {
+            color: #202124;
+            font-weight: 400;
+            font-size: 18px;
+            padding-top: 20px
+        }
+
+        .folder-row-main {
+            padding-top: 9px;
+            align-items: center;
+        }
+
+        .folder-main a {
+            border: 1px solid #dadce0;
+            border-radius: 5px;
+            text-align: center;
+            color: rgb(143, 143, 143);
+            padding: 20px 15px;
+            width: 100%;
+        }
+
+        .folder-main a:hover {
+            background: #e8f0fe;
+        }
+
+        .folder-main {
+            position: relative;
+            width: 18%;
+            margin: 11px;
+        }
+
+        .folder-main i {
+            font-size: 60px;
+            color: #72cff9;
+        }
+
+        .folder-main span {
+            font-size: 14px;
+            color: rgba(0, 0, 0, .72);
+        }
+
+        .folder-row-main.files-row-main .folder-main a {
+            display: flex;
+            align-items: center;
+            text-align: left;
+        }
+
+        .folder-row-main.files-row-main .folder-main i {
+            font-size: 20px;
+            padding-right: 10px;
+        }
+
+        .folder-main .dropdown-content a {
+            border: 1px solid #f1f1f1;
+            border-radius: 0;
+            font-size: 14px;
+            padding: 10px 15px;
+            text-align: left;
+        }
+        .dropdown-content a:hover {
+            background-color: #f7f7f7;
+        }
+
+        #searchbar {
+            margin-top: 15px
+        }
+
+        @media only screen and (min-width: 320px) and (max-width: 768px) {
+            .folder-main {
+                width: 43%;
+            }
+
+            .navigation-row .breadcrumb .breadcrumb-item a {
+                padding: 3px;
+                font-size: 13px;
+            }
+
+            .container {
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid drive-folder-main">
+    <div class="container">
+        <div class="row mx-0 navigation-row">
+            <ul class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'cloud:init_url' %}">Home</a></li>
+                {% for nav in navs %}
+                    <li class="breadcrumb-item"><a href="{{ nav.url }}">{{ nav.name|truncatechars:20 }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% if folder %}
+            <div class="row">
+                <div class="col-sm-3 col-12">
+                    <div class="heading-text w-100"><span id="folder_length">{{ folder|length }}</span> Folder{{ folder|pluralize }}</div>
+                </div>
+                <div class="col-sm-9 col-12">
+                    <input class="form-control" type="search" id="searchbar" placeholder="Search Folder">
+                </div>
+            </div>
+            <div class="row mx-0 folder-row-main" id="folders">
+                {% for f in folder %}
+                    <div class="folder-main">
+                        <a href="{{ f|urlencode }}/" class="d-inline-block">
+                            <i class="fa fa-folder" aria-hidden="true"></i>
+                            <span class="d-inline-block w-100">{{ f|truncatechars:17 }}</span>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% if files %}
+            <div class="heading-text w-100">{{ files|length }} File{{ files|pluralize }}</div>
+            <div class="row mx-0 folder-row-main files-row-main">
+                {% for f in files %}
+                    <div class="folder-main">
+                        <a href="{{ f.Key|urlencode }}?download=true" target="_blank" class="d-inline-block">
+                            <i class="fa fa-file-text" aria-hidden="true"></i>
+                            <span>{{ f.Key|truncatechars:17 }}</span>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script>
+  let folders = {{ folder|safe }};
+  $("#searchbar").keyup(function () {
+    let count = 0;
+    let input = $("#searchbar").val().toUpperCase();
+    let folder_html = $("#folders .folder-main");
+    folders.forEach(function (txtValue, index) {
+      if (txtValue.toUpperCase().indexOf(input) > -1) {
+        folder_html[index].style.display = "";
+        count += 1;
+        $('#folder_length').text(count)
+      }
+      else {
+        folder_html[index].style.display = 'none'
+      }
+    });
+  });
+
+</script>
+</body>
+</html>
+
+
+
